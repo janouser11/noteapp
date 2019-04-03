@@ -5,6 +5,9 @@ import { Grid, Button, Modal } from "@material-ui/core";
 import Notes from "./components/notes";
 import ModalContent from "./components/modalContent";
 
+const baseUrl = "https://safe-inlet-97630.herokuapp.com/api/notes";
+
+//todo extract out api calls
 class App extends Component {
   state = {
     open: false,
@@ -18,6 +21,16 @@ class App extends Component {
     filteredKeyword: ""
   };
 
+  componentDidMount() {
+    fetch(baseUrl, {})
+      .then(res => res.json())
+      .then(response =>
+        this.setState({
+          notes: response
+        })
+      )
+      .catch(error => console.error("Error:", error));
+  }
   handleOpen = () => {
     this.setState({ open: true });
   };
@@ -27,17 +40,32 @@ class App extends Component {
   };
 
   handleSave = body => {
+    const { notes } = this.state;
     console.log("Saving new note: " + body);
     //handle creating new note
     //ajax call to create note
     //on success, update state
-
+    //get last id in notes
+    const lastNote = notes[notes.length - 1];
+    const newId = lastNote ? lastNote.id + 1 : 1;
+    const note = { id: newId, body };
+    fetch(baseUrl, {
+      method: "POST", // or 'PUT'
+      body: JSON.stringify(note),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => res.json())
+      .then(response => {
+        let updatedNotes = this.state.notes.concat(note);
+        this.setState({
+          notes: updatedNotes
+        });
+      })
+      .catch(error => console.error("Error:", error));
     //todo: add validation to not create a note with the same id
 
-    let updatedNotes = this.state.notes.concat({ id: 6, body });
-    this.setState({
-      notes: updatedNotes
-    });
     //then close modal
     this.handleClose();
   };
@@ -45,28 +73,50 @@ class App extends Component {
   deleteNote = id => {
     //remove note with ajax call
     // on success, filter out note
-    const filteredNotes = this.state.notes.filter(note => note.id !== id);
+    fetch(`${baseUrl}/${id}`, {
+      method: "DELETE", // or 'PUT'
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => res.json())
+      .then(response => {
+        const filteredNotes = this.state.notes.filter(note => note.id !== id);
 
-    this.setState({
-      filteredNotes
-    });
+        this.setState({
+          notes: filteredNotes
+        });
+      })
+      .catch(error => console.error("Error:", error));
   };
 
   updateNote = note => {
     //update note with ajax call
     //on success
+    fetch(baseUrl, {
+      method: "PUT", // or 'PUT'
+      body: JSON.stringify(note),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => res.json())
+      .then(response => {
+        //update note in state
+        //make copy
+        let notesToUpdate = this.state.notes;
+        //find note
+        let noteToUpdate = this.state.notes.findIndex(
+          item => item.id == note.id
+        );
+        //update note
+        notesToUpdate[noteToUpdate] = note;
 
-    //update note in state
-    //make copy
-    let notesToUpdate = this.state.notes;
-    //find note
-    let noteToUpdate = this.state.notes.findIndex(item => item.id == note.id);
-    //update note
-    notesToUpdate[noteToUpdate] = note;
-
-    this.setState({
-      notes: notesToUpdate
-    });
+        this.setState({
+          notes: notesToUpdate
+        });
+      })
+      .catch(error => console.error("Error:", error));
   };
 
   filterNotesBySearchResult = keyword => {

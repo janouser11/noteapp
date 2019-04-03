@@ -10,16 +10,22 @@ export default class Notes extends Component {
         <Grid item xs={12} className="note-header">
           <h2>Here are all of your current notes</h2>
         </Grid>
-        {notes.map(note => (
-          <Grid item xs={3}>
-            <Note
-              key={note.id}
-              note={note}
-              deleteNote={deleteNote}
-              updateNote={updateNote}
-            />
-          </Grid>
-        ))}
+        {notes.length === 0 ? (
+          <p className="no-notes">
+            Oops! There are no notes! Click new note to get started
+          </p>
+        ) : (
+          notes.map(note => (
+            <Grid item xs={3}>
+              <Note
+                key={note.id}
+                note={note}
+                deleteNote={deleteNote}
+                updateNote={updateNote}
+              />
+            </Grid>
+          ))
+        )}
       </Grid>
     );
   }

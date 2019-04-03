@@ -41,6 +41,9 @@
   top: 50%;
   margin: auto;
 }
+.no-notes {
+  margin-left: 10px;
+}
 
 .new-note-header {
   background: #3f51b5;

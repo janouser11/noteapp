@@ -39,10 +39,7 @@ export default class Note extends Component {
     let newNote = oldNote;
     newNote.body = editValue;
 
-    //don't make the call if there is no difference
-    if (oldNote.body !== newNote.body) {
-      updateNote(newNote);
-    }
+    updateNote(newNote);
   };
 
   changeEditMode = bool => this.setState({ isEditMode: bool });
